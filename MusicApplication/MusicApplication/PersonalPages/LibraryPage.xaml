@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicApplication.PersonalPages.LibraryPage"
+             xmlns:views="clr-namespace:MusicApplication.PersonalPages"
+             Title="LibraryPage"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto, Auto, Auto,  *, Auto">
+        <VerticalStackLayout Grid.Row="0" Margin="0">
+            <Grid ColumnDefinitions="Auto, *" >
+                <ImageButton Grid.Column="0"
+                     HeightRequest="30"
+                     WidthRequest="30"
+                     Source="back_icon.png" Margin="20, 20, 0, 10"
+                     CornerRadius="50"
+                     Clicked="OnBackButtonTapped"
+                     VerticalOptions="Center"
+                     HorizontalOptions="End" />
+                <Label Text="Thư viện cá nhân" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Margin="20, 15, 10, 10" FontSize="24" TextColor="Black"/>
+
+            </Grid>
+
+            <BoxView BackgroundColor="LightGray" HeightRequest="10" Margin="0, 0, 0, 15"/>
+        </VerticalStackLayout>
+        <VerticalStackLayout Grid.Row="1" >
+            <Button Text="Chọn file nhạc" BackgroundColor="LightBlue" TextColor="Black"  HorizontalOptions="Center" WidthRequest="200" Clicked="OnPickFileClicked"/>
+            <Entry x:Name="TitleEntry" HorizontalOptions="Center" WidthRequest="300" Placeholder="Tiêu đề" Margin="0,10, 0, 0 "/>
+            <Entry x:Name="GenreEntry" HorizontalOptions="Center" WidthRequest="300" Placeholder="Thể loại" Margin="0,10, 0, 10 "/>
+            <Button Text="Tải lên" BackgroundColor="LightBlue" TextColor="Black" HorizontalOptions="Center" WidthRequest="200" Clicked="OnUploadClicked"/>
+            <BoxView BackgroundColor="LightGray" HeightRequest="10" Margin="0, 10, 0, 0"/>
+        </VerticalStackLayout>
+
+        <Label x:Name="ListTrackLabel" FontSize="18" HorizontalOptions="Center"  Grid.Row="2" FontAttributes="Bold" Margin="0,30,0,0"/>
+
+        <ListView Grid.Row="3"
+                  x:Name="TracksListView"
+                  ItemsSource="{Binding Tracks}"
+                  ItemSelected="TracksListView_ItemSelected"
+                  RowHeight="100">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid HeightRequest="100" Padding="10" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Frame Grid.Column="0"
+                                   WidthRequest="36"
+                                   HeightRequest="36"
+                                   BackgroundColor="LightGray"
+                                   HasShadow="False"
+                                   Padding="0"
+                                   CornerRadius="8"
+                                   VerticalOptions="Center">
+                                <Image Source="track_cover.png"
+                                       Aspect="AspectFill"
+                                       WidthRequest="24"
+                                       HeightRequest="24"/>
+                            </Frame>
+                            <!-- Thông tin bài hát -->
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold"/>
+                                <Label Text="{Binding Artist}" FontSize="14" TextColor="Gray"/>
+                            </VerticalStackLayout>
+
+                            <!-- Nút more (3 chấm) sát phải -->
+                            <ImageButton Source="dots_icon.png"
+                                 WidthRequest="24"
+                                 HeightRequest="24"
+                                 BackgroundColor="Transparent"
+                                 Clicked="MoreButton_Clicked"
+                                 CommandParameter="{Binding}"
+                                 Grid.Column="2"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="Center"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <views:MiniPlayerView VerticalOptions="End"
+                      Grid.Row="4" />
+    </Grid>
+</ContentPage>

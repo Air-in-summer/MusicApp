@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="MusicApplication.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MusicApplication"
+    Shell.FlyoutBehavior="Disabled"
+    Title="MusicApplication"
+    
+    Shell.TabBarBackgroundColor="Black"
+    Shell.TabBarTitleColor="White"
+    Shell.TabBarForegroundColor="White"
+    Shell.ForegroundColor ="White"
+    Shell.TabBarUnselectedColor="Grey"
+    Shell.BackgroundColor="White"
+    >
+
+    <TabBar>
+        <ShellContent
+            Icon="Resources/Images/Shell/home.png"
+            Title="Trang chính"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Route="MainPage" />
+        <ShellContent
+            Title="Tìm kiếm"
+            Icon="Resources/Images/Shell/search.png"
+            ContentTemplate="{DataTemplate local:SearchPage}"
+            Route="SearchPage" />
+        <ShellContent
+            Title="Cá nhân"
+            Icon="Resources/Images/Shell/library.png"
+            ContentTemplate="{DataTemplate local:PersonalPage}"
+            Route="PersonalPage" />
+    </TabBar>
+
+</Shell>

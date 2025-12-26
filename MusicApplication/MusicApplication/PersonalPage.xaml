@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:MusicApplication.PersonalPages"
+             x:Class="MusicApplication.PersonalPage"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="DefaultItem" TargetType="Label">
+                <Setter Property="FontSize" Value="Title" />
+                <Setter Property="Padding" Value="20,0,0,0" />
+                <Setter Property="FlexLayout.Grow" Value="1" />
+            </Style>
+            <Style x:Key="ArrowIconItem" TargetType="Image">
+                <Setter Property="FlexLayout.Basis" Value="18" />
+                <Setter Property="HeightRequest" Value="18" />
+                <Setter Property="Source" Value="goto_icon.png" />
+            </Style>
+            <Style x:Key="DefaultImage" TargetType="Image">
+                <Setter Property="FlexLayout.Basis" Value="30" />
+                <Setter Property="HeightRequest" Value="30" />
+            </Style>
+            <Style x:Key="TitleItem" TargetType="Label">
+                <Setter Property="FontSize" Value="Title" />
+                <Setter Property="TextColor" Value="Black" />
+            </Style>
+            <Style x:Key="ContentItem" TargetType="Label">
+                <Setter Property="FontSize" Value="Subtitle" />
+                <Setter Property="TextColor" Value="Green" />
+                <Setter Property="HorizontalTextAlignment" Value="Center" />
+            </Style>
+            <Style x:Key="FooterItem" TargetType="Label">
+                <Setter Property="FontSize" Value="Subtitle" />
+                <Setter Property="TextColor" Value="Gray" />
+            </Style>
+            <Style x:Key="SeparatorItem" TargetType="BoxView">
+                <Setter Property="BackgroundColor" Value="Black" />
+                <Setter Property="HeightRequest" Value="1" />
+            </Style>
+            <Style x:Key="FlexItem" TargetType="FlexLayout">
+                <Setter Property="BackgroundColor" Value="White" />
+                <Setter Property="Padding" Value="20,0" />
+                <Setter Property="AlignItems" Value="Center" />
+                <Setter Property="HeightRequest" Value="80" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
+    <!--Shell.TitleView>
+        <FlexLayout Padding="0,0,15,0" JustifyContent="SpaceBetween">
+            <Label Style="{StaticResource DefaultItem}" Text="Library" />
+            
+        </FlexLayout>
+    </Shell.TitleView-->
+    
+    <ContentPage.Content>
+        <Grid RowDefinitions="Auto, *, Auto" >
+            <VerticalStackLayout Grid.Row="0" Margin="0">
+                <Grid ColumnDefinitions="*, Auto" >
+                    <Label Text="Thư viện" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Start" Margin="20, 15, 10, 10" FontSize="24" TextColor="Black"/>
+                    <ImageButton Grid.Column="1"
+                            HeightRequest="36"
+                            WidthRequest="36"
+                            Source="user_icon.png" Margin="0, 20, 20, 10"
+                            CornerRadius="50"
+                            Clicked="OnProfileTapped"
+                            VerticalOptions="Center"
+                            HorizontalOptions="End" />  
+                </Grid>
+                
+                <BoxView BackgroundColor="LightGray" HeightRequest="10" Margin="0"/>
+            </VerticalStackLayout>
+            <ScrollView Grid.Row="1">
+                <StackLayout Spacing="0" VerticalOptions="Start">
+
+                    <FlexLayout x:Name="PlaylistsSection" Style="{StaticResource FlexItem}">
+                        <Image Source="playlist_icon.png" Style="{StaticResource DefaultImage}" />
+                        <Label Style="{StaticResource DefaultItem}" Text="Playlists" />
+                        <Image Style="{StaticResource ArrowIconItem}" />
+                        <FlexLayout.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPlaylistsTapped"/>
+                        </FlexLayout.GestureRecognizers>
+                    </FlexLayout>
+                    <BoxView Style="{StaticResource SeparatorItem}" />
+
+                    <FlexLayout x:Name="UploadsSection" Style="{StaticResource FlexItem}">
+                        <Image Source="upload_icon.png" Style="{StaticResource DefaultImage}" />
+                        <Label Style="{StaticResource DefaultItem}" Text="Tải lên" />
+                        <Image Style="{StaticResource ArrowIconItem}" />
+                        <FlexLayout.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnUploadsTapped"/>
+                        </FlexLayout.GestureRecognizers>
+                    </FlexLayout>
+                    <BoxView Style="{StaticResource SeparatorItem}" />
+
+                    <FlexLayout Style="{StaticResource FlexItem}">
+                        <Image Source="download_icon.png" Style="{StaticResource DefaultImage}" />
+                        <Label Style="{StaticResource DefaultItem}" Text="Tải xuống" />
+                        <Image Style="{StaticResource ArrowIconItem}" />
+                        <FlexLayout.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnDownloadsTapped"/>
+                        </FlexLayout.GestureRecognizers>
+                    </FlexLayout>
+                    <BoxView Style="{StaticResource SeparatorItem}" />
+                    <!--FlexLayout Margin="0,16,0,0" Style="{StaticResource FlexItem}"> <Label Style="{StaticResource TitleItem}" Text="Recently Played" /> </FlexLayout> <BoxView Style="{StaticResource SeparatorItem}" /> <FlexLayout Padding="60,0" HeightRequest="280" JustifyContent="Center" Style="{StaticResource FlexItem}"> <Label Style="{StaticResource ContentItem}" Text="Find your recently played content here." /> </FlexLayout> <BoxView Style="{StaticResource SeparatorItem}" /> <FlexLayout JustifyContent="Center" Style="{StaticResource FlexItem}"> <Label Style="{StaticResource FooterItem}" Text="See more recently played" /> <Image Margin="8,0,0,0" Style="{StaticResource ArrowIconItem}" /> </FlexLayout-->
+
+                </StackLayout>
+            </ScrollView>
+            <views:MiniPlayerView VerticalOptions="End"
+                      Grid.Row="2" />
+        </Grid>
+    </ContentPage.Content>
+
+</ContentPage>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicApplication.PersonalPages.FullPlayerPage"
+             xmlns:viewModels="clr-namespace:MusicApplication.ViewModels"
+             Title="Now Playing"
+             Shell.NavBarIsVisible="False">
+    
+    <!-- Full Player Page, xuất hiện khi người dùng nhấn vào MiniPlayerView-->
+
+
+    <Grid Padding="0" RowDefinitions="Auto, Auto,Auto, Auto,Auto,Auto" RowSpacing="20">
+        <!-- 0. nút back-->
+        <ImageButton Grid.Column="0"
+                     HeightRequest="30"
+                     WidthRequest="30"
+                     Source="back_icon.png" Margin="20, 20, 0, 10"
+                     CornerRadius="50"
+                     Clicked="OnBackButtonTapped"
+                     VerticalOptions="Start"
+                     HorizontalOptions="Start" />
+        
+        <!-- 1. Ảnh bìa -->
+        <Border Grid.Row="1"
+                WidthRequest="300"
+                HeightRequest="300"
+               Stroke="Black"              
+               StrokeThickness="2"
+               BackgroundColor="LightGray"
+               Padding="0"
+               StrokeShape="RoundRectangle 150"
+               VerticalOptions="Start"
+               HorizontalOptions="Center">
+            <Image Source="track_cover.png"
+                   Aspect="AspectFill"
+                   WidthRequest="200"
+                   HeightRequest="200"/>
+        </Border>
+
+        <!-- 2. Thông tin bài hát -->
+        <StackLayout Grid.Row="2" Spacing="6" HorizontalOptions="Center" VerticalOptions="Start" Margin ="10, 30, 10, 0" >
+            <Label Text="{Binding DisplayTitle}" 
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"/>
+            <Label Text="{Binding DisplayArtist}" 
+                   FontSize="16"
+                   TextColor="Gray"
+                   HorizontalTextAlignment="Center"/>
+        </StackLayout>
+
+        <!-- 3. Thanh tiến độ -->
+        <Slider x:Name="ProgressSlider" VerticalOptions="Start" Margin="10, 30, 10 , 0 " 
+                Grid.Row="3"
+                Minimum="0"
+                Maximum="{Binding DurationSeconds}"
+                Value="{Binding CurrentSeconds, Mode=TwoWay}"
+                DragStarted="ProgressSlider_DragStarted"
+                DragCompleted="ProgressSlider_DragCompleted"
+                 />
+
+        <!-- 4. Thời gian -->
+        <Grid Grid.Row="4" ColumnDefinitions="*,Auto" Margin="10, -10, 10 , 0 ">
+            <Label Text="{Binding CurrentPosition, StringFormat='{0:hh\\:mm\\:ss}'}"
+                   FontSize="12"
+                   HorizontalOptions="Start" />
+            <Label Text="{Binding Duration, StringFormat='{0:hh\\:mm\\:ss}'}"
+                   FontSize="12"
+                   HorizontalOptions="End" />
+        </Grid>
+
+        <!-- 5. Nút Play/Pause -->
+        <Grid Grid.Row="4" ColumnDefinitions="*, *, *, *, *" Margin="20, 60, 20, 0 ">
+            <ImageButton Grid.Column="0" Source="{Binding RepeatIcon}" Command="{Binding ToggleRepeatCommand}"
+                             BackgroundColor="Transparent" HeightRequest="50" WidthRequest="50" HorizontalOptions="Start" />
+            <ImageButton Grid.Column="1" Source="previous_icon.png" Command="{Binding PlayPreviousCommand}"
+                             BackgroundColor="Transparent" HeightRequest="50" WidthRequest="50" />
+            <ImageButton Grid.Column="2" Source="{Binding PlayPauseIcon}" Command="{Binding TogglePlayPauseCommand}"
+                             BackgroundColor="Transparent" HeightRequest="65" WidthRequest="65" HorizontalOptions="Center"/>
+            <ImageButton Grid.Column="3" Source="next_icon.png" Command="{Binding PlayNextCommand}"
+                             BackgroundColor="Transparent" HeightRequest="50" WidthRequest="50" />
+            <ImageButton Grid.Column="4" Source="dots_icon.png" Clicked="MoreButton_Clicked" CommandParameter="{Binding}"
+                             BackgroundColor="Transparent" HeightRequest="50" WidthRequest="50" HorizontalOptions="End" />
+        </Grid>
+    
+    </Grid>
+</ContentPage>

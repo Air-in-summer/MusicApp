@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="MusicApplication.PersonalPages.BottomSheetContent"
+               
+               VerticalOptions="End" >
+    <VerticalStackLayout BackgroundColor="LightGray">
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label x:Name="TitleLabel" Text="Tùy chọn bài hát" FontAttributes="Bold" FontSize="18" TextColor="Black" />
+            <Button x:Name="AddToPlaylistButton" Text="Thêm vào danh sách phát" Clicked="OnAddToPlaylistClicked" IsVisible="False" TextColor="Black" BackgroundColor="LightBlue"/>
+            <Button x:Name="DeleteFromPlaylistButton" Text="Xóa khỏi danh sách phát" Clicked="OnDeleteFromPlaylistClicked" IsVisible="False" TextColor="Black" BackgroundColor="LightBlue"/>
+            <Button x:Name="DeletePlaylistButton" Text="Xoá danh sách phát" Clicked="OnDeletePlaylistClicked" IsVisible="False" TextColor="Black" BackgroundColor="LightBlue"/>
+            <Button x:Name="DeleteTrackButton" Text="Xoá bài hát" Clicked="OnDeleteTrackClicked" IsVisible="False" TextColor="Black" BackgroundColor="LightBlue" />
+            <Button x:Name="DeleteDownloadTrackButton" Text="Xóa khỏi danh sách tải xuống" Clicked="OnDeleteDownloadTrackClicked" IsVisible="False" TextColor="Black" BackgroundColor="LightBlue" />
+            <Button x:Name="DownloadTrackButton" Text="Tải xuống" Clicked="OnDownloadClicked" IsVisible="False" TextColor="Black" BackgroundColor="LightBlue" />
+            <Button Text="Hủy" Clicked="OnCancelClicked" TextColor="Black" BackgroundColor="LightBlue" />
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</toolkit:Popup>

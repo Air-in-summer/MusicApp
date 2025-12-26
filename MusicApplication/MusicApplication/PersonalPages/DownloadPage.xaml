@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicApplication.PersonalPages.DownloadPage"
+             xmlns:views="clr-namespace:MusicApplication.PersonalPages"
+             Title="DownloadPage"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto">
+        <VerticalStackLayout Grid.Row="0" Margin="0">
+            <Grid ColumnDefinitions="Auto, *" >
+                <ImageButton Grid.Column="0"
+                     HeightRequest="30"
+                     WidthRequest="30"
+                     Source="back_icon.png" Margin="20, 20, 0, 10"
+                     CornerRadius="50"
+                     Clicked="OnBackButtonTapped"
+                     VerticalOptions="Center"
+                     HorizontalOptions="End" />
+                <Label Text="Tải xuống" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Margin="20, 15, 10, 10" FontSize="24" TextColor="Black"/>
+
+            </Grid>
+
+            <BoxView BackgroundColor="LightGray" HeightRequest="10" Margin="0, 0, 0, 30"/>
+        </VerticalStackLayout>
+        <Label Text="Danh sách bài hát đã tải xuống " 
+               FontSize="24"
+               HorizontalOptions="Center"
+               Padding="10, 0, 10, 10 "
+               Grid.Row="1"  />
+        
+        <ListView x:Name="DownloadListView"
+                  Grid.Row="2"
+                  ItemsSource="{Binding DownloadedTracks}"
+                  ItemSelected="DownloadListView_ItemSelected"
+                  RowHeight="100">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid ColumnSpacing="10" Padding="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Frame Grid.Column="0"
+                                   WidthRequest="36"
+                                   HeightRequest="36"
+                                   BackgroundColor="LightGray"
+                                   HasShadow="False"
+                                   Padding="0"
+                                   CornerRadius="8"
+                                   VerticalOptions="Center">
+                                <Image Source="track_cover.png"
+                                       Aspect="AspectFill"
+                                       WidthRequest="24"
+                                       HeightRequest="24"/>
+                            </Frame>
+                            <StackLayout Grid.Column="1" VerticalOptions="Center">
+                                <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold"/>
+                                <Label Text="{Binding Artist}" FontSize="14"/>
+                                <Label Text="{Binding Duration, StringFormat='{0:hh\\:mm\\:ss}'}" FontSize="14" />
+                            </StackLayout>
+                            <ImageButton Source="dots_icon.png"
+                                         WidthRequest="24"
+                                         HeightRequest="24"
+                                         BackgroundColor="Transparent"
+                                         Clicked="MoreButton_Clicked"
+                                         CommandParameter="{Binding}"
+                                         Grid.Column="2"
+                                         HorizontalOptions="End"
+                                         VerticalOptions="Center"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <views:MiniPlayerView VerticalOptions="End"
+                      Grid.Row="3" />
+    </Grid>
+</ContentPage>

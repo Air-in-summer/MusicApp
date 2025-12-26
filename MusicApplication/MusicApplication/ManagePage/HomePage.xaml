@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicApplication.ManagePage.HomePage"
+             >
+    <VerticalStackLayout Spacing="20" Padding="40">
+        <Image Source="fami_icon.jpg" HeightRequest="200" WidthRequest="200" HorizontalOptions="Center"/>
+        <Label Text="Welcome to Music App!" FontSize="26" FontAttributes="Bold" TextColor="Black" HorizontalOptions="Center" Margin="0,0, 0, 20" />
+        <Button Text="Tạo tài khoản mới" BackgroundColor="#4CAF50" Clicked="OnRegisterClicked"
+                FontSize="20" CornerRadius="12" Margin="10, 10, 10, 0"/>
+        <Button Text="Tôi đã có tài khoản" BackgroundColor="#2196F3" Clicked="OnLoginClicked" 
+                FontSize="20" CornerRadius="12" Margin="10, 0, 10, 0"/>
+    </VerticalStackLayout>
+</ContentPage>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicApplication.PersonalPages.MiniPlayerView"
+             x:Name="MiniPlayer">
+    
+    <ContentView.GestureRecognizers>
+        <TapGestureRecognizer Tapped="OnTapped" />
+    </ContentView.GestureRecognizers>
+    <!-- Đây là một trình điều khiển phát nhạc mini (mini music player control), được đặt ở dưới cùng của ứng dụng -->
+    <Grid Padding="0" Margin="0" BackgroundColor="LightBlue" RowDefinitions="*, Auto" ColumnDefinitions="*,Auto">
+        <!-- Bên trái: thông tin bài hát -->
+        <StackLayout Grid.Row="0" Grid.Column="0" Margin="10" Orientation="Vertical">
+            <Label Text="{Binding DisplayTitle}"
+                   TextColor="Black"
+                   FontAttributes="Bold"
+                   FontSize="16"/>
+            <Label Text="{Binding DisplayArtist}"
+                   TextColor="Black"
+                   FontSize="14"/>
+        </StackLayout>
+
+        <!-- Bên phải: nút Play/Pause -->
+        <ImageButton
+            Grid.Row="0"
+            Grid.Column="1"
+            Source="{Binding PlayPauseIcon}"
+            Command="{Binding TogglePlayPauseCommand}"
+            Margin="10"
+            BackgroundColor="Transparent"
+            HeightRequest="40"
+            WidthRequest="40"/>
+
+        <ProgressBar Grid.Row="1"
+                     Grid.ColumnSpan="2"
+                     HorizontalOptions="FillAndExpand"
+                     Progress="{Binding ProgressValue}"
+                     ProgressColor="White"
+                     BackgroundColor="Gray"
+                     HeightRequest="4"
+                     Margin="0,0,0,0"/>
+    </Grid>
+</ContentView>

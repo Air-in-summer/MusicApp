@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicApplication.PersonalPages.PlaylistPage"
+             xmlns:views="clr-namespace:MusicApplication.PersonalPages"
+             Title="PlaylistPage"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto, Auto,Auto, Auto, *, Auto, Auto">
+        <VerticalStackLayout Grid.Row="0" Margin="0">
+            <Grid ColumnDefinitions="Auto, *" >
+                <ImageButton Grid.Column="0"
+                             HeightRequest="30"
+                             WidthRequest="30"
+                             Source="back_icon.png" Margin="20, 20, 0, 10"
+                             CornerRadius="50"
+                             Clicked="OnBackButtonTapped"
+                             VerticalOptions="Center"
+                             HorizontalOptions="End" />
+                <Label Text="Danh sách phát" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Margin="20, 15, 10, 10" FontSize="24" TextColor="Black"/>
+                
+            </Grid>
+
+            <BoxView BackgroundColor="LightGray" HeightRequest="10" Margin="0"/>
+        </VerticalStackLayout>
+        <Label Margin="15,20, 0,5 " Text="Tạo Playlist mới" Grid.Row="1" FontAttributes="Bold" FontSize="20"/>
+
+        <!--HorizontalStackLayout Margin="10" Grid.Row="2">
+            <Entry x:Name="NewPlaylistEntry" Placeholder="Nhập tên playlist..." WidthRequest="300"/>
+            <Button Text="Tạo" Clicked="OnCreatePlaylistClicked"/>
+        </HorizontalStackLayout-->
+        <Grid Margin="10, 10, 10, 0 " Grid.Row="2" ColumnDefinitions="*, Auto">
+            <Entry x:Name="NewPlaylistEntry" Placeholder="Nhập tên playlist..." Margin="0, 0, 60, 0" />
+            <Button Text="Tạo" HorizontalOptions="End" Clicked="OnCreatePlaylistClicked"/>
+        </Grid>
+
+        <Label Text="Các danh sách phát của bạn" FontSize="18" HorizontalOptions="Center" IsVisible="{Binding IsNotSelectingPlaylists}" Grid.Row="3" FontAttributes="Bold" Margin="0,30,0,10"/>
+       
+        <ListView Grid.Row="4"
+                  x:Name="PlaylistsListView"
+                  ItemsSource="{Binding Playlists}"
+                  ItemSelected="PlaylistsListView_ItemSelected"
+                  RowHeight="100"
+                  IsVisible="{Binding IsNotSelectingPlaylists}" >
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid Padding="10" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Frame Grid.Column="0"
+                                   WidthRequest="36"
+                                   HeightRequest="36"
+                                   BackgroundColor="LightGray"
+                                   HasShadow="False"
+                                   Padding="0"
+                                   CornerRadius="8"
+                                   VerticalOptions="Center">
+                                <Image Source="playlist_cover.png"
+                                       Aspect="AspectFill"
+                                       WidthRequest="24"
+                                       HeightRequest="24"/>
+                            </Frame>
+                            <Label Text="{Binding PlaylistName}" VerticalOptions="Center" Grid.Column="1" FontSize="18" FontAttributes="Bold"/>
+                            <ImageButton Source="dots_icon.png"
+                                         WidthRequest="24"
+                                         HeightRequest="24"
+                                         BackgroundColor="Transparent"
+                                         Clicked="MoreButton_Clicked"
+                                         CommandParameter="{Binding}"
+                                         Grid.Column="2"
+                                         HorizontalOptions="End"
+                                         VerticalOptions="Center"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Label Text="Danh sách playlist có thể chọn" FontSize="18" HorizontalOptions="Center" IsVisible="{Binding IsSelectingPlaylists}" Grid.Row="3" FontAttributes="Bold" Margin="0,30,0,10" /> 
+        
+        <ListView x:Name="PlaylistsCheckedListView"
+                  ItemsSource="{Binding Playlists}"
+                  RowHeight="100"
+                   Grid.Row="4"
+                  IsVisible="{Binding IsSelectingPlaylists}" >
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid  Padding="10" ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Frame Grid.Column="0"
+                                   WidthRequest="36"
+                                   HeightRequest="36"
+                                   BackgroundColor="LightGray"
+                                   HasShadow="False"
+                                   Padding="0"
+                                   CornerRadius="8"
+                                   VerticalOptions="Center">
+                                <Image Source="playlist_cover.png"
+                                       Aspect="AspectFill"
+                                       WidthRequest="24"
+                                       HeightRequest="24"/>
+                            </Frame>
+                            <Label Grid.Column="1" VerticalOptions="Center" Text="{Binding PlaylistName}" FontSize="18" FontAttributes="Bold"/>
+                            <CheckBox Grid.Column="2" HorizontalOptions="End" IsChecked="{Binding IsSelected}"/>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Button x:Name="ConfirmButton"
+                Grid.Row="5"
+                Text="Xác nhận thêm vào Playlist"
+                Clicked="OnConfirmAddToPlaylistClicked"
+                HorizontalOptions="Center"
+                IsVisible="{Binding IsSelectingPlaylists}"
+                Margin="0,10"/>
+        
+        <views:MiniPlayerView VerticalOptions="End"
+                      Grid.Row="6" />
+    </Grid>
+
+</ContentPage>

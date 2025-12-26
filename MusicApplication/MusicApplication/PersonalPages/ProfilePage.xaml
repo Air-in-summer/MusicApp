@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MusicApplication.PersonalPages.ProfilePage"
+             xmlns:views="clr-namespace:MusicApplication.PersonalPages"
+             Title="ProfilePage"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
+        <VerticalStackLayout Grid.Row="0" Margin="0">
+            <Grid ColumnDefinitions="Auto, *" >
+                <ImageButton Grid.Column="0"
+                     HeightRequest="30"
+                     WidthRequest="30"
+                     Source="back_icon.png" Margin="20, 20, 0, 10"
+                     CornerRadius="50"
+                     Clicked="OnBackButtonTapped"
+                     VerticalOptions="Center"
+                     HorizontalOptions="End" />
+                <Label Text="Quản lý tài khoản" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" Margin="20, 15, 10, 10" FontSize="24" TextColor="Black"/>
+
+            </Grid>
+
+            <BoxView BackgroundColor="LightGray" HeightRequest="10" Margin="0, 0, 0, 15"/>
+        </VerticalStackLayout>
+        <VerticalStackLayout Grid.Row="1">
+            <!-- Sử dụng AbsoluteLayout để chồng ảnh lên -->
+            <AbsoluteLayout HeightRequest="130">
+
+                <!-- Vùng trên màu light blue -->
+                <BoxView Color="LightBlue"
+                 AbsoluteLayout.LayoutBounds="0,0,1,0.5"
+                 AbsoluteLayout.LayoutFlags="All" />
+
+                <!-- Vùng dưới màu trắng -->
+                <BoxView Color="White"
+                 AbsoluteLayout.LayoutBounds="0,1,1,0.5"
+                 AbsoluteLayout.LayoutFlags="All" />
+
+                <!-- Ảnh đại diện -->
+                <Frame  AbsoluteLayout.LayoutBounds="0.05,0.5,80,80"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                CornerRadius="50"
+                IsClippedToBounds="True"
+                BorderColor="LightGray"
+                BackgroundColor="White"
+                Padding="0"
+                HasShadow="False">
+                    <Image Source="user_icon.png" Aspect="AspectFill" />
+                </Frame>
+            </AbsoluteLayout>
+
+            <!-- Tên người dùng -->
+            <Label x:Name="LabelUserName"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Start"
+                   VerticalOptions="Start"
+                   Margin="25,-10,0,0" />
+            
+            <Label x:Name="LabelEmail"
+                   FontSize="16"
+                   HorizontalOptions="Start"
+                   VerticalOptions="Start"
+                   Margin="25,0,0,0" />
+
+        </VerticalStackLayout>
+        <Button Grid.Row="2" FontSize="20" Text="Đổi mật khẩu" Margin="20, 30, 20, 10" CornerRadius="12" Clicked="OnChangePassClicked" BackgroundColor="Blue" TextColor="White" />
+        <Button Grid.Row="3" FontSize="20"  Text="Đăng xuất" Margin="20, 10, 20, 0" CornerRadius="12" Clicked="OnLogoutClicked" BackgroundColor="Red" TextColor="White" />
+        <views:MiniPlayerView VerticalOptions="End" 
+              Grid.Row="4" />
+    </Grid>
+</ContentPage>
