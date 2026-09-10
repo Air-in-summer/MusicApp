@@ -11,9 +11,8 @@ namespace MusicAppBackend.Services
     {
         Task<AuthResult> RegisterAsync(string username, string email, string password);
         Task<AuthResult> LoginAsync(string email, string password);
-
+        Task<AuthResult> RefreshAccessTokenAsync(string oldRefreshToken); // Thêm hàm đổi Token
         Task<AuthResult> ChangePasswordAsync(string email, string newPassword);
-
     }
 
     // kết quả trả về từ các thao tác xác thực
@@ -22,6 +21,7 @@ namespace MusicAppBackend.Services
         public bool Success { get; set; }
         public string? ErrorMessage { get; set; }
         public string? Token { get; set; }
+        public string? RefreshToken { get; set; } // Thêm trường RefreshToken
         public User? User { get; set; }
     }
 
@@ -87,13 +87,48 @@ namespace MusicAppBackend.Services
             if (user.PasswordHash != passwordHash)
                 return new AuthResult { Success = false, ErrorMessage = "Email hoặc mật khẩu không đúng." };
 
-            // Tạo JWT token
+            // Tạo JWT token và Refresh Token
             JwtHelper jwtHelper = new JwtHelper(_configuration);
             var token = jwtHelper.GenerateToken(user);
+            var refreshToken = jwtHelper.GenerateRefreshToken();
+
+            // Gán Refresh Token vào cơ sở dữ liệu
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // Thời gian hết hạn của Refresh Token (7 ngày)
+            await _context.SaveChangesAsync();
+
             // Ẩn thông tin nhạy cảm trước khi trả về
             user.PasswordHash = null;
             user.PasswordSalt = null;
-            return new AuthResult { Success = true, Token = token, User = user };
+            return new AuthResult { Success = true, Token = token, RefreshToken = refreshToken, User = user };
+        }
+
+        // Xử lý cấp lại Access Token mới dựa trên Refresh Token
+        public async Task<AuthResult> RefreshAccessTokenAsync(string oldRefreshToken)
+        {
+            // Tìm người dùng sở hữu Refresh Token tương ứng
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == oldRefreshToken);
+            if (user == null)
+                return new AuthResult { Success = false, ErrorMessage = "Refresh Token không tồn tại hoặc không hợp lệ." };
+
+            // Kiểm tra thời hạn của Refresh Token
+            if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                return new AuthResult { Success = false, ErrorMessage = "Refresh Token đã hết hạn. Vui lòng đăng nhập lại." };
+
+            // Khởi tạo cặp Token mới 
+            JwtHelper jwtHelper = new JwtHelper(_configuration);
+            var newToken = jwtHelper.GenerateToken(user);
+            var newRefreshToken = jwtHelper.GenerateRefreshToken();
+
+            // Cập nhật Database
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await _context.SaveChangesAsync();
+
+            user.PasswordHash = null;
+            user.PasswordSalt = null;
+
+            return new AuthResult { Success = true, Token = newToken, RefreshToken = newRefreshToken, User = user };
         }
 
         public async Task<AuthResult> ChangePasswordAsync(string email, string newPassword)

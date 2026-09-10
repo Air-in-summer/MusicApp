@@ -6,7 +6,7 @@ namespace MusicAppBackend.Data
     public class UploadTrackDto
     {
         [Required]
-        public IFormFile File { get; set; }
+        public required IFormFile File { get; set; }
 
         public string Title { get; set; } = string.Empty;
 

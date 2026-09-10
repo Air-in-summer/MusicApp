@@ -1,4 +1,4 @@
-﻿using Amazon;
+using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
@@ -12,15 +12,13 @@ public class S3Service
 {
     private readonly IAmazonS3 _s3Client;
     private readonly string _bucketName;
+    private readonly string _serviceUrl;
 
-    public S3Service(IConfiguration configuration)
+    public S3Service(IAmazonS3 s3Client, IConfiguration configuration)
     {
-        _s3Client = new AmazonS3Client(
-            configuration["AWS:AccessKey"],
-            configuration["AWS:SecretKey"],
-            RegionEndpoint.GetBySystemName(configuration["AWS:Region"])
-        );
+        _s3Client = s3Client; // Dùng chung IAmazonS3 được khởi tạo ở Program.cs
         _bucketName = configuration["AWS:BucketName"];
+        _serviceUrl = configuration["AWS:ServiceURL"];
     }
 
     public async Task<string> UploadFileAsync(string filePath, string keyName)
@@ -28,7 +26,8 @@ public class S3Service
         var fileTransferUtility = new TransferUtility(_s3Client);
         await fileTransferUtility.UploadAsync(filePath, _bucketName, keyName);
 
-        return $"https://{_bucketName}.s3.amazonaws.com/{keyName}";
+        // Format URL của MinIO: http://ip:9000/bucket_name/key_name
+        return $"{_serviceUrl}/{_bucketName}/{keyName}";
     }
 
     public async Task DeleteFileAsync(string keyName)

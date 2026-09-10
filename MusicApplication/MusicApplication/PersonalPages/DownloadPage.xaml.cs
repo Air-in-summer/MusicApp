@@ -50,11 +50,9 @@ public partial class DownloadPage : ContentPage
 
             try
             {
-                //await playerService.PlayDownloadTrackAsync(selectedTrack);
                 var index = viewModel.DownloadedTracks.IndexOf(selectedTrack);
-                var list = viewModel.DownloadedTracks.ToList(); // Convert ObservableCollection -> List
+                var list = viewModel.DownloadedTracks.ToList(); 
 
-                //var playerService = ServiceHelper.GetService<PlayerService>();
                 await playerService.PlayFromDownloadedListAsync(list, index);
             }
             catch (Exception ex)
@@ -74,24 +72,6 @@ public partial class DownloadPage : ContentPage
         var popup = new BottomSheetContent(selectedTrack);
         this.ShowPopup(popup);
     }
-
-    /*private async void DownloadListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        var selected = e.CurrentSelection.FirstOrDefault() as DownloadedTrackViewModel;
-        if (selected == null) return;
-
-        if (selected.Status == "Có thể phát")
-        {            var player = AudioManager.Current;
-            await player.StopAsync();
-            await player.PlayAsync(selected.LocalPath);
-        }
-        else
-        {
-            await DisplayAlert("Thông báo", "Bài hát đã hết hạn. Cần kết nối mạng để tiếp tục nghe.", "OK");
-        }
-
-        DownloadListView.SelectedItem = null;
-    }*/
 
     private async void OnBackButtonTapped(object sender, EventArgs e)
     {

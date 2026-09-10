@@ -34,18 +34,31 @@ namespace MusicAppBackend.Services
             };
             Console.WriteLine($"Generating token for user: {user.Username}, UserId: {user.UserId}, Email: {user.Email}, Role: {user.Role}");
 
+
+            // tạo token
             var token = new JwtSecurityToken(
                 issuer: jwtIssuer,
                 audience: jwtIssuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(7), // Thời gian hết hạn token
+                expires: DateTime.UtcNow.AddSeconds(30), // TUỲ CHỈNH ĐỂ TEST: Chỉnh còn 30 giây để kiểm thử cơ chế Refresh Token
                 signingCredentials: credentials
             );
 
             string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
             
+            // trả token về
             return tokenString;
+        }
 
+        // Hàm tạo chuỗi Refresh Token ngẫu nhiên
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
         }
     }
 }

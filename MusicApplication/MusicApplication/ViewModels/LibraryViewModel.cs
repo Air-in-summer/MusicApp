@@ -1,4 +1,4 @@
-﻿using MusicApplication.Models;
+using MusicApplication.Models;
 using MusicApplication.Services;
 using System;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace MusicApplication.ViewModels
 {
+    // Lớp ViewModel quản lý thư viện bản nhạc cá nhân của người dùng, thực hiện liên kết dữ liệu và các tương tác UI.
     public class LibraryViewModel
     {
         private readonly TrackService trackService;
@@ -33,6 +34,7 @@ namespace MusicApplication.ViewModels
             trackService = ServiceHelper.GetService<TrackService>();
         }
 
+        // Giao tiếp với TrackService để truy xuất và cập nhật danh sách bản nhạc do người dùng tải lên.
         public async Task LoadUserTracks(int userId)
         {
             var responseTrack = await trackService.GetTracksByUserIdAsync(userId);
@@ -51,6 +53,7 @@ namespace MusicApplication.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        // Gửi yêu cầu HTTP Multipart để tải tệp âm thanh lên máy chủ và trả về trạng thái tác vụ.
         public async Task<bool> UploadTrackAsync(MultipartFormDataContent content)
         {
             var response = await trackService.UploadTrackAsync(content);

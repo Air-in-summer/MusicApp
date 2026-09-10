@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MusicAppBackend.Models;
 using MusicAppBackend.Services;
 using System.Threading.Tasks;
 
 namespace MusicAppBackend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase

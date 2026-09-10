@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MusicAppBackend.Data;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 namespace MusicAppBackend.Controllers
 {
     // controller kiểm soát track
+    [Authorize] 
     [ApiController]
     [Route("api/[controller]")]
     public class TracksController : ControllerBase
@@ -80,16 +82,12 @@ namespace MusicAppBackend.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> SearchTracks([FromQuery] string query)
         {
-            /*var result = await _dbContext.Tracks
-                .Where(t => t.Title.Contains(query) || t.Artist.Contains(query))
-                .ToListAsync();*/
-
             var result = await _trackService.SearchTracksAsync(query);
 
             return Ok(result);
         }
 
-        //endpoint xoá 1 bài hát (tham số là trackId)
+        // xoá 1 bài hát 
         [HttpDelete]
         [Route("{trackId}")]
         public async Task<IActionResult> DeleteTrack(int trackId)

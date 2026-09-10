@@ -21,7 +21,7 @@ namespace MusicAppBackend.Repositories
         }
         public async Task<IEnumerable<Playlist>> GetPlaylistsByUserAsync(int userId)
         {
-            // Retrieve playlists for a specific user
+            // Lấy danh sách phát cho một người dùng cụ thể
             return await _context.Playlists
                 .Where(p => p.UserId == userId)
                 .OrderByDescending(p => p.CreatedAt)
@@ -30,7 +30,7 @@ namespace MusicAppBackend.Repositories
 
         public async Task AddPlaylistAsync(Playlist playlist)
         {
-            // Add a new playlist to the database
+            // Thêm 1 playlist mới vào database
             _context.Playlists.Add(playlist);
             await _context.SaveChangesAsync();
         }

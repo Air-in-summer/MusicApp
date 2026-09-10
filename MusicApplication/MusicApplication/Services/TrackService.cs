@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-// class thao tác với track 
 namespace MusicApplication.Services
 {
+	// Lớp dịch vụ chịu trách nhiệm giao tiếp với Backend API để thực hiện các thao tác CRUD đối với bài hát (Track).
+	// Cung cấp các phương thức truy vấn danh sách, tìm kiếm, tải lên và xóa bài hát.
     public class TrackService
     {
         private readonly HttpClient httpClient;

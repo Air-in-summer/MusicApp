@@ -24,6 +24,12 @@ namespace MusicAppBackend.Models
         [Column("cover_image")]
         public string? CoverImage { get; set; }
 
+        [Column("refresh_token")]
+        public string? RefreshToken { get; set; }
+
+        [Column("refresh_token_expiry")]
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+
         // Navigation
         public ICollection<Track>? Tracks { get; set; }
         public ICollection<Playlist>? Playlists { get; set; }

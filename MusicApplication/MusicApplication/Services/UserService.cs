@@ -1,4 +1,4 @@
-﻿using MusicApplication.Models;
+using MusicApplication.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 namespace MusicApplication.Services
 {
+    // Cung cấp các nghiệp vụ tương tác với API máy chủ để xử lý dữ liệu liên quan đến người dùng.
     public class UserService
     {
         private readonly HttpClient httpClient;
@@ -15,6 +16,7 @@ namespace MusicApplication.Services
             httpClient = ServiceHelper.GetService<HttpClient>();
         }
 
+        // Truy vấn API để tìm kiếm và trả về danh sách người dùng khớp với chuỗi truy vấn đầu vào.
         public async Task<IEnumerable<User>> SearchUserAsync(string query)
         {
             try

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using MusicApplication.Models;
 using MusicApplication.Services;
 using System;
@@ -28,6 +28,7 @@ namespace MusicApplication.ViewModels
         public static SearchCategoryType Artists => new() { Name = "Nghệ sĩ", Type = SearchCategory.Artists };
     }
 
+    // Lớp ViewModel thực hiện các logic tìm kiếm tích hợp, cho phép truy vấn cả bản nhạc và người dùng trên hệ thống máy chủ.
     public partial class SearchViewModel : ObservableObject
     {
 
@@ -59,6 +60,7 @@ namespace MusicApplication.ViewModels
             userService = ServiceHelper.GetService<UserService>();
         }
 
+        // Bộ điều phối thực thi tìm kiếm dựa trên danh mục được thiết lập, đồng bộ hóa kết quả vào tập hợp chính.
         public async Task SearchAsync(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
@@ -76,6 +78,8 @@ namespace MusicApplication.ViewModels
 
             }
         }
+        
+        // Thực hiện truy vấn API hệ thống để tìm kiếm danh sách các bản nhạc khớp với từ khóa đầu vào.
         public async Task SearchTracksAsync(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -93,6 +97,7 @@ namespace MusicApplication.ViewModels
             OnPropertyChanged(nameof(SearchResults));
         }
 
+        // Thực hiện truy vấn API hệ thống để tìm kiếm thông tin các hồ sơ người dùng khớp với từ khóa.
         public async Task SearchUserAsync(string query)
         {
             if (string.IsNullOrWhiteSpace(query))

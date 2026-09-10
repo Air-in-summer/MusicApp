@@ -23,7 +23,7 @@ namespace MusicAppBackend.Repositories
         }
         public async Task<IEnumerable<Track>> GetTracksByPlaylistIdAsync(int playlistId)
         {
-            // Retrieve tracks for a specific playlist
+            // Lấy track cho một người dùng cụ thể
             var tracks = await _context.PlaylistTracks
                 .Where(pt => pt.PlaylistId == playlistId)
                 .OrderBy(pt => pt.AddedAt)
@@ -34,7 +34,7 @@ namespace MusicAppBackend.Repositories
 
         public async Task AddTrackToPlaylistAsync(PlaylistTrack playlistTrack)
         {
-            // Add a new track to the specified playlist
+            // Thêm 1 track mới vào playlist
             _context.PlaylistTracks.Add(playlistTrack);
             await _context.SaveChangesAsync();
         }

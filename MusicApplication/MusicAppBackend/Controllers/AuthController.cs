@@ -39,9 +39,24 @@ namespace MusicAppBackend.Controllers
             var result = await _authService.LoginAsync(request.Email, request.Password);
             if (!result.Success)
                 return BadRequest(result.ErrorMessage);
-            return Ok(new { token = result.Token, user = result.User });
+            
+            // Trả về cả Access Token và Refresh Token cho Frontend
+            return Ok(new { token = result.Token, refreshToken = result.RefreshToken, user = result.User });
         }
 
+        // Endpoint nhận Refresh Token cũ để cấp cặp Token mới
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.RefreshToken))
+                return BadRequest("Refresh Token không được để trống.");
+
+            var result = await _authService.RefreshAccessTokenAsync(request.RefreshToken);
+            if (!result.Success)
+                return Unauthorized(result.ErrorMessage); // Trả về 401 để báo Frontend phải đăng nhập lại
+
+            return Ok(new { token = result.Token, refreshToken = result.RefreshToken, user = result.User });
+        }
 
 
         [HttpPost("changepass")]
@@ -75,5 +90,9 @@ namespace MusicAppBackend.Controllers
     {
         public string? Email { get; set; }
         public string? Password { get; set; }
+    }
+    public class RefreshRequest
+    {
+        public string? RefreshToken { get; set; }
     }
 }

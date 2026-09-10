@@ -1,25 +1,22 @@
-﻿using MusicApplication.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Plugin.Maui.Audio;
+using CommunityToolkit.Maui.Views;
+using CommunityToolkit.Maui.Core.Primitives;
+using MusicApplication.Models;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace MusicApplication.Services
 {
+	// Cung cấp các dịch vụ phát nhạc nền tảng (background playback), quản lý trạng thái trình phát
+	// và tương tác với thành phần MediaElement của UI.
+	// Hỗ trợ cả luồng phát trực tuyến (Online) và phát từ bộ nhớ cục bộ (Offline).
     public class PlayerService : INotifyPropertyChanged
     {
-        private readonly IAudioManager audioManager;
-        private IAudioPlayer? player;
-        private readonly HttpClient httpClient;
-        private bool isTimerRunning = false;
+        private MediaElement? player;
+        public bool HasMediaElement => player != null;
+
         private Track? currentTrack;
+	// Bài hát trực tuyến hiện tại đang được phát.
         public Track? CurrentTrack
         {
             get => currentTrack;
@@ -30,10 +27,12 @@ namespace MusicApplication.Services
                 OnPropertyChanged(nameof(IsPlaying));
             }
         }
+
         private List<Track> currentTrackList = new();
         private int currentTrackIndex = -1;
 
         private DownloadedTrack? currentDownloadedTrack;
+	// Bài hát ngoại tuyến hiện tại đang được phát.
         public DownloadedTrack? CurrentDownloadedTrack
         {
             get => currentDownloadedTrack;
@@ -47,19 +46,10 @@ namespace MusicApplication.Services
         private List<DownloadedTrack> currentDownloadedList = new();
         private int currentDownloadedIndex = -1;
 
-        //tiến độ 
-        private TimeSpan currentPosition;
-        public TimeSpan CurrentPosition
-        {
-            get => currentPosition;
-            private set
-            {
-                currentPosition = value;
-                OnPropertyChanged(nameof(CurrentPosition));
-            }
-        }
+        public TimeSpan CurrentPosition => player?.Position ?? TimeSpan.Zero;
+        public TimeSpan Duration => player?.Duration ?? TimeSpan.Zero;
+        public bool IsPlaying => player?.CurrentState == MediaElementState.Playing;
 
-        //lặp hay không 
         private bool isRepeat = false;
         public bool IsRepeat
         {
@@ -67,36 +57,84 @@ namespace MusicApplication.Services
             set
             {
                 isRepeat = value;
+                if (player != null)
+                {
+                    player.ShouldLoopPlayback = value;
+                }
                 OnPropertyChanged(nameof(IsRepeat));
             }
         }
-
-        public TimeSpan Duration => TimeSpan.FromSeconds(player?.Duration ?? 0);
-        public bool IsPlaying => player?.IsPlaying ?? false;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public PlayerService()
         {
-            audioManager = AudioManager.Current;
-            httpClient = new HttpClient();
         }
 
+        private bool _isDragging = false;
+
+	// Liên kết đối tượng MediaElement từ UI Visual Tree vào Service.
+	// <param name="me">Thực thể MediaElement được khởi tạo từ View.</param>
+        public void AttachMediaElement(MediaElement me)
+        {
+            player = me;
+            player.ShouldAutoPlay = false;
+            player.ShouldLoopPlayback = IsRepeat;
+
+            player.PositionChanged += (s, e) =>
+            {
+                // Ngừng cập nhật giao diện nếu người dùng đang thao tác kéo thanh Slider để tránh xung đột vị trí
+                if (_isDragging) return;
+
+                OnPropertyChanged(nameof(CurrentPosition));
+                
+                // Đồng bộ hóa trạng thái vị trí phát hiện tại vào bộ nhớ đệm mỗi 3 giây
+                if (player.Position.TotalSeconds > 0 && (int)player.Position.TotalSeconds % 3 == 0)
+                {
+                    Preferences.Set("LastPosition", player.Position.TotalSeconds);
+                }
+            };
+
+            player.StateChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(IsPlaying));
+                if (e.NewState == MediaElementState.Playing || e.NewState == MediaElementState.Paused)
+                {
+                    OnPropertyChanged(nameof(Duration));
+                }
+            };
+
+            player.MediaEnded += async (s, e) =>
+            {
+                await OnPlaybackEnded();
+            };
+
+            player.MediaOpened += (s, e) =>
+            {
+                // Đảm bảo Stream đã mở hoàn toàn trước khi thực hiện lệnh Seek để khôi phục vị trí cũ
+                if (_resumePosition > TimeSpan.Zero)
+                {
+                    player.SeekTo(_resumePosition);
+                    _resumePosition = TimeSpan.Zero; 
+                }
+            };
+
+            LoadLastState();
+        }
+
+	// Bắt đầu phát nhạc từ một danh sách các bài hát trực tuyến.
         public async Task PlayFromListAsync(List<Track> trackList, int startIndex)
         {
-            if (startIndex < 0 || startIndex >= trackList.Count)
-                return;
-
+            if (startIndex < 0 || startIndex >= trackList.Count) return;
             currentTrackList = trackList;
             currentTrackIndex = startIndex;
             await PlayAsync(currentTrackList[currentTrackIndex]);
         }
 
+	// Bắt đầu phát nhạc từ một danh sách các bài hát ngoại tuyến (đã tải về).
         public async Task PlayFromDownloadedListAsync(List<DownloadedTrack> downloadedList, int startIndex)
         {
-            if (startIndex < 0 || startIndex >= downloadedList.Count)
-                return;
-
+            if (startIndex < 0 || startIndex >= downloadedList.Count) return;
             currentDownloadedList = downloadedList;
             currentDownloadedIndex = startIndex;
             await PlayDownloadTrackAsync(currentDownloadedList[currentDownloadedIndex]);
@@ -104,241 +142,171 @@ namespace MusicApplication.Services
 
         public async Task PlayAsync(Track selectedTrack)
         {
-            try
-            {
-                CurrentDownloadedTrack = null;
-                currentDownloadedList.Clear();
-                if (player != null)
-                {
-                    player.PlaybackEnded -= OnPlaybackEnded;
-                    player.Stop();
-                    player.Dispose();
-                }
+            if (player == null) return;
+            
+            CurrentDownloadedTrack = null;
+            CurrentTrack = selectedTrack;
 
-                var response = await httpClient.GetAsync(selectedTrack.AudioUrl, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
+            player.Source = MediaSource.FromUri(selectedTrack.AudioUrl);
+            player.Play();
 
-                using var stream = await response.Content.ReadAsStreamAsync();
-                var memoryStream = new MemoryStream();
-                await stream.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
-
-                player = audioManager.CreatePlayer(memoryStream);
-
-                CurrentTrack = selectedTrack;
-                player.Play();
-                StartProgressTimer();
-
-                player.PlaybackEnded += OnPlaybackEnded;
-
-                OnPropertyChanged(nameof(IsPlaying));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi phát nhạc: {ex.Message}");
-                throw;
-            }
+            SaveState();
         }
 
-        /////////////////////////////    
         public async Task PlayDownloadTrackAsync(DownloadedTrack downloadedTrack)
         {
-            try
-            {
-                CurrentTrack = null;
-                currentTrackList.Clear();
-                if (player != null)
-                {
-                    player.PlaybackEnded -= OnPlaybackEnded;
-                    player.Stop();
-                    player.Dispose();
-                }
+            if (player == null) return;
+            
+            CurrentTrack = null;
+            CurrentDownloadedTrack = downloadedTrack;
 
-                var localPath = downloadedTrack.LocalPath;
+            player.Source = MediaSource.FromFile(downloadedTrack.LocalPath);
+            player.Play();
 
-                if (!File.Exists(localPath))
-                    throw new FileNotFoundException("Không tìm thấy file nhạc", localPath);
-
-                using var fileStream = File.OpenRead(localPath);
-                var memoryStream = new MemoryStream();
-                await fileStream.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
-
-                player = audioManager.CreatePlayer(memoryStream);
-                CurrentDownloadedTrack = downloadedTrack;
-                player.Play();
-                StartProgressTimer();
-
-                player.PlaybackEnded += OnPlaybackEnded;
-
-                OnPropertyChanged(nameof(IsPlaying));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi phát nhạc offline: {ex.Message}");
-                throw;
-            }
+            SaveState();
         }
 
         public async Task PlayNextAsync()
         {
-            if (/*CurrentTrack != null &&*/ currentTrackList.Count > 0)
+            if (currentTrackList.Count > 0)
             {
                 currentTrackIndex++;
-                if (currentTrackIndex >= currentTrackList.Count)
-                    currentTrackIndex = 0; // quay vòng hoặc bạn có thể bỏ if
-
+                if (currentTrackIndex >= currentTrackList.Count) currentTrackIndex = 0;
                 await PlayAsync(currentTrackList[currentTrackIndex]);
             }
-            else if (/*CurrentDownloadedTrack != null &&*/ currentDownloadedList.Count > 0)
+            else if (currentDownloadedList.Count > 0)
             {
                 currentDownloadedIndex++;
-                if (currentDownloadedIndex >= currentDownloadedList.Count)
-                    currentDownloadedIndex = 0;
-
+                if (currentDownloadedIndex >= currentDownloadedList.Count) currentDownloadedIndex = 0;
                 await PlayDownloadTrackAsync(currentDownloadedList[currentDownloadedIndex]);
             }
         }
 
         public async Task PlayPreviousAsync()
         {
-            if (CurrentTrack != null && currentTrackList.Count > 0)
+            if (currentTrackList.Count > 0)
             {
                 currentTrackIndex--;
-                if (currentTrackIndex < 0)
-                    currentTrackIndex = currentTrackList.Count - 1;
-
+                if (currentTrackIndex < 0) currentTrackIndex = currentTrackList.Count - 1;
                 await PlayAsync(currentTrackList[currentTrackIndex]);
             }
-            else if (CurrentDownloadedTrack != null && currentDownloadedList.Count > 0)
+            else if (currentDownloadedList.Count > 0)
             {
                 currentDownloadedIndex--;
-                if (currentDownloadedIndex < 0)
-                    currentDownloadedIndex = currentDownloadedList.Count - 1;
-
+                if (currentDownloadedIndex < 0) currentDownloadedIndex = currentDownloadedList.Count - 1;
                 await PlayDownloadTrackAsync(currentDownloadedList[currentDownloadedIndex]);
             }
         }
 
-        private async void OnPlaybackEnded(object? sender, EventArgs e)
+        private async Task OnPlaybackEnded()
         {
-            
-            DownloadedTrack cloneDownloadedTrack = CurrentDownloadedTrack;
-            Track cloneTrack = CurrentTrack;
-            CurrentDownloadedTrack = null;
-            CurrentTrack = null;
-            OnPropertyChanged(nameof(IsPlaying));
-
-            await MainThread.InvokeOnMainThreadAsync(async () =>
+            if (!IsRepeat)
             {
-                try
+                await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    //await PlayNextAsync();
-                    if (IsRepeat)
-                    {
-                        // 🔁 Phát lại bài hiện tại
-                        if (cloneTrack != null)
-                            await PlayAsync(cloneTrack);
-                        else if (cloneDownloadedTrack != null)
-                            await PlayDownloadTrackAsync(cloneDownloadedTrack);
-                    }
-                    else
-                    {
-                        //await Task.Delay(100); // Đảm bảo đã giải phóng player
-                        await PlayNextAsync(); // ▶ Phát bài tiếp theo nếu không lặp
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Lỗi khi xử lý PlaybackEnded: {ex.Message}");
-                }
-            });
+                    await PlayNextAsync();
+                });
+            }
         }
+
         public void TogglePlayPause()
         {
             if (player == null) return;
 
-            if (player.IsPlaying)
+            if (player.CurrentState == MediaElementState.Playing)
                 player.Pause();
             else
-            {
                 player.Play();
-                StartProgressTimer();
-            }
-
-            OnPropertyChanged(nameof(IsPlaying));
         }
 
-        public void MusicDispose()
+        public void Seek(TimeSpan position)
         {
-            if (player != null)
-            {
-                player.Stop();
-                player.Dispose();
-                player = null;
-            }
-
-            CurrentTrack = null;
-            CurrentDownloadedTrack = null;
-            StopProgressTimer();
-            OnPropertyChanged(nameof(IsPlaying));
+            player?.SeekTo(position);
+            Preferences.Set("LastPosition", position.TotalSeconds);
+            _isDragging = false; // Phục hồi cơ chế cập nhật UI sau khi thực hiện Seek
         }
 
         public void StartProgressTimer()
         {
-            if (isTimerRunning) return;
-
-            isTimerRunning = true;
-            Application.Current.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(500), () =>
-            {
-                if (player != null && player.IsPlaying)
-                {
-                    CurrentPosition = TimeSpan.FromSeconds(player.CurrentPosition);
-                    return true; // tiếp tục timer
-                }
-                isTimerRunning = false;
-                return false; // dừng timer
-            });
-        }
-        public void Seek(TimeSpan position)
-        {
-            if (player == null) return;
-            /*Console.WriteLine($"🔁 Seek to: {position}");
-            double seconds = position.TotalSeconds;
-            player.Seek(seconds);
-            CurrentPosition = position;*/
-            double seconds = position.TotalSeconds;
-            double duration = player.Duration;
-
-            if (seconds >= duration)
-            {
-                seconds = duration - 0.1;
-                if (seconds < 0) seconds = 0;
-            }
-
-            Debug.WriteLine($"🔁 Seek to: {TimeSpan.FromSeconds(seconds)}");
-
-            try
-            {
-                player.Seek(seconds);
-                CurrentPosition = TimeSpan.FromSeconds(seconds);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"❌ Seek failed: {ex.Message}");
-            }
+            _isDragging = false;
         }
 
         public void StopProgressTimer()
         {
-            isTimerRunning = false;
+            _isDragging = true;
         }
+
+        public void MusicDispose()
+        {
+            player?.Stop();
+            CurrentTrack = null;
+            CurrentDownloadedTrack = null;
+            OnPropertyChanged(nameof(IsPlaying));
+        }
+
         protected void OnPropertyChanged(string name)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
             });
+        }
+
+	// Lưu trữ cấu hình bài hát hiện tại vào thiết lập của hệ điều hành.
+	// Cho phép khôi phục phiên nghe nhạc sau khi ứng dụng bị tắt.
+        private void SaveState()
+        {
+            if (CurrentTrack != null)
+            {
+                Preferences.Set("LastTrackType", "Online");
+                Preferences.Set("LastTrack", JsonSerializer.Serialize(CurrentTrack));
+            }
+            else if (CurrentDownloadedTrack != null)
+            {
+                Preferences.Set("LastTrackType", "Offline");
+                Preferences.Set("LastTrack", JsonSerializer.Serialize(CurrentDownloadedTrack));
+            }
+        }
+
+        private TimeSpan _resumePosition = TimeSpan.Zero;
+
+	// Truy xuất và tải lại trạng thái phiên nghe nhạc cuối cùng của người dùng.
+        private void LoadLastState()
+        {
+            try
+            {
+                var type = Preferences.Get("LastTrackType", "");
+                var json = Preferences.Get("LastTrack", "");
+                var pos = Preferences.Get("LastPosition", 0.0);
+
+                if (!string.IsNullOrEmpty(json) && player != null)
+                {
+                    // Lưu trữ tạm thời vị trí để khôi phục khi MediaElement kích hoạt sự kiện MediaOpened
+                    _resumePosition = TimeSpan.FromSeconds(pos); 
+                    if (type == "Online")
+                    {
+                        var track = JsonSerializer.Deserialize<Track>(json);
+                        if (track != null)
+                        {
+                            CurrentTrack = track;
+                            player.Source = MediaSource.FromUri(track.AudioUrl);
+                        }
+                    }
+                    else if (type == "Offline")
+                    {
+                        var track = JsonSerializer.Deserialize<DownloadedTrack>(json);
+                        if (track != null)
+                        {
+                            CurrentDownloadedTrack = track;
+                            player.Source = MediaSource.FromFile(track.LocalPath);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Lỗi LoadLastState: {ex.Message}");
+            }
         }
     }
 }

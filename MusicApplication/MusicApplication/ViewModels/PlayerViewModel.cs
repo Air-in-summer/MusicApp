@@ -1,4 +1,4 @@
-﻿using MusicApplication.Models;
+using MusicApplication.Models;
 using MusicApplication.Services;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -6,6 +6,7 @@ using System.Windows.Input;
 
 namespace MusicApplication.ViewModels
 {
+    // Lớp ViewModel quản lý trạng thái của trình phát nhạc thu nhỏ (MiniPlayer), thực hiện logic điều khiển phát đa phương tiện và đồng bộ giao diện.
     public class MiniPlayerViewModel : INotifyPropertyChanged
     {
         public PlayerService PlayerService { get; }
@@ -13,18 +14,21 @@ namespace MusicApplication.ViewModels
         public Track? CurrentTrack => PlayerService.CurrentTrack;
         public DownloadedTrack? CurrentDownloadedTrack => PlayerService.CurrentDownloadedTrack;
 
-        //kiểm tra play/pause
+        // Kiểm tra trạng thái phát/tạm dừng
         public bool IsPlaying => PlayerService.IsPlaying;
         public ICommand TogglePlayPauseCommand { get; }
-        public string PlayPauseIcon => IsPlaying ? "pause_icon.png" : "play_icon.png"; // path tới icon
-
-
-        // vị trí hiện tại và duration
+        public string PlayPauseIcon => IsPlaying ? "pause_icon.png" : "play_icon.png"; // Đường dẫn tới biểu tượng tương ứng
+        
+        // Vị trí hiện tại và thời lượng
         public TimeSpan CurrentPosition => PlayerService.CurrentPosition;
         public TimeSpan Duration => PlayerService.Duration;
 
         // 🟢 Sử dụng để binding cho Slider an toàn
-        public double CurrentSeconds => CurrentPosition.TotalSeconds;
+        public double CurrentSeconds 
+        { 
+            get => CurrentPosition.TotalSeconds; 
+            set { /* Hàm set ảo để tránh phá vỡ binding TwoWay của Slider */ } 
+        }
         public double DurationSeconds => Duration.TotalSeconds;
 
         public double ProgressValue => Duration.TotalSeconds > 0
@@ -36,11 +40,11 @@ namespace MusicApplication.ViewModels
         public string DisplayTitle => CurrentTrack?.Title ?? CurrentDownloadedTrack?.Title ?? "Không có bài nào đang phát";
         public string DisplayArtist => CurrentTrack?.Artist ?? CurrentDownloadedTrack?.Artist ?? "Nghệ sĩ không rõ";
 
-        //chuyển next/prev
+        // Lệnh điều hướng
         public ICommand PlayNextCommand { get; }
         public ICommand PlayPreviousCommand { get; }
 
-        //lặp lại 
+        // Trạng thái lặp lại
         public bool IsRepeat
         {
             get => PlayerService.IsRepeat;
@@ -109,6 +113,8 @@ namespace MusicApplication.ViewModels
                 IsRepeat = !IsRepeat;
             });
         }
+        
+        // Yêu cầu PlayerService chuyển đổi vị trí phát hiện tại dựa trên giá trị thời gian đầu vào.
         public void SeekTo(TimeSpan position)
         {
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace MusicApplication.Services
 {
+    // Lớp quản lý và giám sát trạng thái kết nối mạng của ứng dụng tới máy chủ.
     public class ConnectivityService
     {
         private bool isServerReachable;
@@ -21,6 +22,7 @@ namespace MusicApplication.Services
             StartMonitoring();
         }
 
+        // Bắt đầu tiến trình nền để liên tục giám sát trạng thái kết nối đến máy chủ theo chu kỳ.
         private void StartMonitoring()
         {
             _ = Task.Run(async () =>
@@ -59,15 +61,17 @@ namespace MusicApplication.Services
             });
         }
 
+        // Thực hiện yêu cầu HTTP GET để kiểm tra tính khả dụng của API máy chủ.
         public async Task<bool> IsApiReachable()
         {     
             try
             {
-                using var client = new HttpClient
-                {
-                    Timeout = TimeSpan.FromSeconds(3)
-                };
-                var response = await client.GetAsync("http://10.0.2.2:5296/api/Test/ping");
+                // Tạo một CancellationToken tự động hủy (cancel) sau đúng 3 giây
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
+                // Truyền cts.Token vào hàm GetAsync của httpClient dùng chung
+                var response = await httpClient.GetAsync("api/Test/ping", cts.Token);
+                
                 Debug.WriteLine($"🌐 Ping server status: {(int)response.StatusCode} - {response.StatusCode}");
                 return response.IsSuccessStatusCode;
             }
@@ -78,6 +82,7 @@ namespace MusicApplication.Services
             }
         }
 
+        // Hủy bỏ luồng thực thi và dừng tiến trình giám sát kết nối.
         public void StopMonitoring()
         {
             _cts.Cancel();

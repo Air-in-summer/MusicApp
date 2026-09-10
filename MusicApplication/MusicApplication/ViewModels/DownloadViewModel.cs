@@ -1,4 +1,4 @@
-﻿using MusicApplication.Models;
+using MusicApplication.Models;
 using MusicApplication.Services;
 using System;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace MusicApplication.ViewModels
 {
+    // Lớp ViewModel chịu trách nhiệm xử lý logic và liên kết dữ liệu cho giao diện quản lý các tệp âm thanh đã tải xuống cục bộ.
     public class DownloadViewModel
     {
         public ObservableCollection<DownloadedTrack> DownloadedTracks { get; set; } = new ObservableCollection<DownloadedTrack>();
@@ -21,6 +22,7 @@ namespace MusicApplication.ViewModels
             downloadService = ServiceHelper.GetService<DownloadService>();
         }
 
+        // Tải danh sách các tệp âm thanh từ bộ nhớ cục bộ vào Collection, đồng thời kích hoạt sự kiện cập nhật giao diện người dùng.
         public async Task LoadDownloadedTracks()
         {
             var downloadedTracks = await downloadService.GetDownloadsTracksAsync();

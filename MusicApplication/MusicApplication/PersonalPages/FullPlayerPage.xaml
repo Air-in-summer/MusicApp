@@ -38,7 +38,7 @@
         </Border>
 
         <!-- 2. Thông tin bài hát -->
-        <StackLayout Grid.Row="2" Spacing="6" HorizontalOptions="Center" VerticalOptions="Start" Margin ="10, 30, 10, 0" >
+        <StackLayout Grid.Row="2" Spacing="6" HorizontalOptions="Fill" VerticalOptions="Start" Margin ="10, 30, 10, 0" >
             <Label Text="{Binding DisplayTitle}" 
                    FontSize="24"
                    FontAttributes="Bold"

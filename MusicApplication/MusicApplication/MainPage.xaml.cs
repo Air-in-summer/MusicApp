@@ -25,6 +25,9 @@ namespace MusicApplication
             base.OnAppearing();
             var userName = SecureStorage.GetAsync("username").Result;
             UserNameLabel.Text = "Xin chào, " + userName;
+
+            // Hiện tại đang trả về tất cả Tracks
+            // Chỉ dùng demo do số track ít
             await viewModel.LoadSongs();
         }
 

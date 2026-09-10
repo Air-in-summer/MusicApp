@@ -1,4 +1,4 @@
-﻿using Microsoft.Maui.ApplicationModel.Communication;
+using Microsoft.Maui.ApplicationModel.Communication;
 using MusicApplication.Models;
 using System;
 using System.Collections.Generic;
@@ -17,9 +17,13 @@ namespace MusicApplication.Services
         public bool Success { get; set; }
         public string? ErrorMessage { get; set; }
     }
+	// Lớp dịch vụ quản lý các thao tác liên quan đến xác thực người dùng.
+	// Xử lý giao tiếp với Backend cho các nghiệp vụ: Đăng ký, Đăng nhập, Đổi mật khẩu và Làm mới Token.
     public class AuthService
     {
         private readonly HttpClient httpClient = ServiceHelper.GetService<HttpClient>();
+        
+	// Đăng ký tài khoản người dùng mới.
         public async Task<AuthResult> RegisterAsync(string username, string email, string password, string confirmPassword)
         {
             if(string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
@@ -46,6 +50,7 @@ namespace MusicApplication.Services
                 : new AuthResult { Success = false, ErrorMessage = "Registration failed." };
         }
 
+	// Xác thực thông tin đăng nhập và lưu trữ Token vào hệ thống lưu trữ bảo mật (SecureStorage).
         public async Task<AuthResult> LoginAsync(string email, string password)
         {
             if(string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -69,6 +74,10 @@ namespace MusicApplication.Services
                 if (result != null && !string.IsNullOrEmpty(result.Token) && result.User != null)
                 {
                     await SecureStorage.SetAsync("token", result.Token);
+                    if (!string.IsNullOrEmpty(result.RefreshToken))
+                    {
+                        await SecureStorage.SetAsync("refreshToken", result.RefreshToken);
+                    }
                     await SecureStorage.SetAsync("userID", result.User.UserId.ToString());
                     await SecureStorage.SetAsync("username", result.User.Username ?? string.Empty);
                     await SecureStorage.SetAsync("email", result.User.Email ?? string.Empty);
@@ -81,6 +90,47 @@ namespace MusicApplication.Services
 
             var errorMessage = await response.Content.ReadAsStringAsync();
             return new AuthResult { Success = false, ErrorMessage = errorMessage };
+        }
+
+	// Thực hiện yêu cầu cấp lại Access Token mới từ Backend dựa trên Refresh Token hiện tại.
+	// Phương thức này thường được gọi tự động bởi AuthInterceptor khi phát hiện lỗi 401.
+        public async Task<bool> RefreshTokenAsync()
+        {
+            try
+            {
+                var refreshToken = await SecureStorage.GetAsync("refreshToken");
+                if (string.IsNullOrEmpty(refreshToken)) return false;
+
+                var payload = new { RefreshToken = refreshToken };
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                // Gọi API refresh trên Backend
+                var response = await httpClient.PostAsync("api/auth/refresh", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    if (result != null && !string.IsNullOrEmpty(result.Token))
+                    {
+                        // Lưu lại cặp Token mới
+                        await SecureStorage.SetAsync("token", result.Token);
+                        if (!string.IsNullOrEmpty(result.RefreshToken))
+                        {
+                            await SecureStorage.SetAsync("refreshToken", result.RefreshToken);
+                        }
+                        return true; // Báo hiệu đã làm mới thành công
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi Refresh Token: {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<AuthResult> ChangePassword(string oldPassword, string newPassword)
@@ -121,6 +171,7 @@ namespace MusicApplication.Services
     public class LoginResponse
     {
         public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
         public UserInfo? User { get; set; }
     }
 

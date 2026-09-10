@@ -1,4 +1,4 @@
-﻿using MusicApplication.Models;
+using MusicApplication.Models;
 using MusicApplication.Services;
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 namespace MusicApplication.ViewModels
 {
+	// ViewModel chịu trách nhiệm quản lý dữ liệu cho màn hình chính (HomePage).
+	// Xử lý logic tải danh sách bài hát nổi bật và cập nhật giao diện thông qua cơ chế Data Binding.
     public class MainViewModel : INotifyPropertyChanged
     {
         private readonly TrackService trackService;

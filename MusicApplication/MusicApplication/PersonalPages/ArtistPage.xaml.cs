@@ -54,11 +54,9 @@ public partial class ArtistPage : ContentPage
 
             try
             {
-                //await playerService.PlayAsync(selectedTrack);
                 var index = viewModel.Tracks.IndexOf(selectedTrack);
-                var list = viewModel.Tracks.ToList(); // Convert ObservableCollection -> List
+                var list = viewModel.Tracks.ToList();
 
-                //var playerService = ServiceHelper.GetService<PlayerService>();
                 await playerService.PlayFromListAsync(list, index);
             }
             catch (Exception ex)

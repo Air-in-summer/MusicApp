@@ -1,4 +1,4 @@
-﻿using MusicApplication.Models;
+using MusicApplication.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace MusicApplication.Services
 {
+    // Cung cấp các dịch vụ tương tác với API máy chủ để thực hiện thao tác CRUD trên danh sách phát của người dùng.
     public class PlaylistService
     {
         private readonly HttpClient httpClient;
@@ -17,6 +18,8 @@ namespace MusicApplication.Services
         {
             httpClient = ServiceHelper.GetService<HttpClient>();
         }
+        
+        // Gọi API để truy xuất danh sách các playlist dựa trên định danh của người dùng hiện tại.
         public async Task<List<Playlist>> GetPlaylistsByIdAsync()
         {
             var userId = SecureStorage.GetAsync("userID").Result;     
@@ -52,6 +55,7 @@ namespace MusicApplication.Services
             }
         }
 
+        // Gửi yêu cầu HTTP POST để khởi tạo một playlist mới trên hệ thống máy chủ.
         public async Task<bool> CreatePlaylistAsync(string playlistName)
         {
             var userId = SecureStorage.GetAsync("userID").Result;
@@ -73,6 +77,7 @@ namespace MusicApplication.Services
             return response.IsSuccessStatusCode;
         }
 
+        // Thực hiện liên kết một bản nhạc vào một playlist cụ thể thông qua API.
         public async Task AddTrackToPlaylistAsync(int playlistId, int trackId)
         {
             var track = new
@@ -91,6 +96,7 @@ namespace MusicApplication.Services
             }
         }
 
+        // Gỡ bỏ liên kết của một bản nhạc khỏi playlist được chỉ định trên hệ thống máy chủ.
         public async Task DeleteTrackFromPlaylistAsync(int playlistId, int trackId)
         {
             var response = await httpClient.DeleteAsync($"api/PlaylistTracks?playlistId={playlistId}&trackId={trackId}");
@@ -104,6 +110,7 @@ namespace MusicApplication.Services
             }
         }
 
+        // Gửi yêu cầu định danh để xóa hoàn toàn một playlist khỏi hệ thống máy chủ.
         public async Task DeletePlaylistAsync(int playlistId)
         {
             var response = await httpClient.DeleteAsync($"api/Playlist/{playlistId}");

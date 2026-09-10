@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MusicAppBackend.Data;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 namespace MusicAppBackend.Controllers
 {
     // controller kiểm soát các thao tác với playlist
-    
+    [Authorize] 
     [ApiController]
     [Route("api/[controller]")]
     public class PlaylistController : ControllerBase
